@@ -13,6 +13,9 @@ public class HelloApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("main.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Xshare");
+        stage.setWidth(730);
+        stage.setHeight(530);
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }

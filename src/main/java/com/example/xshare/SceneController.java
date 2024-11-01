@@ -20,7 +20,7 @@ public class SceneController {
     private Parent root;
 
     public void switchToLoginPage(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("login.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
         stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
