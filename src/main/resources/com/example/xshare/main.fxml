@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="399.0" prefWidth="595.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.xshare.SceneController">
-   <right>
-      <VBox prefHeight="399.0" prefWidth="192.0" BorderPane.alignment="CENTER">
+<BorderPane maxHeight="550.0" maxWidth="720.0" minHeight="550.0" minWidth="720.0" prefHeight="550.0" prefWidth="720.0" style="-fx-background-color: #EDEADE;" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.xshare.SceneController">
+   <left>
+      <AnchorPane prefHeight="550.0" prefWidth="351.0" style="-fx-background-color: #FFFFFF;" BorderPane.alignment="CENTER">
          <children>
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#switchToLoginPage" prefHeight="55.0" prefWidth="161.0" style="-fx-background-color: #E50914; -fx-font-size: 22px; -fx-font-weight: bold; -fx-border-radius: 10px;" text="Login" textFill="WHITE">
-               <VBox.margin>
-                  <Insets left="40.0" right="17.0" top="113.0" />
-               </VBox.margin>
+            <Label layoutX="54.0" layoutY="170.0" prefHeight="23.0" prefWidth="108.0" text="Username">
                <font>
-                  <Font size="22.0" />
-               </font>
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#switchToRegisterPage" prefHeight="59.0" prefWidth="150.0" style="-fx-background-color: #E50914; -fx-border-width: 2px; -fx-border-radius: 3px; -fx-font-size: 22px; -fx-font-weight: bold;" text="SignUp" textFill="WHITE">
-               <VBox.margin>
-                  <Insets left="40.0" right="17.0" top="20.0" />
-               </VBox.margin>
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-               <font>
-                  <Font size="4.0" />
-               </font>
-            </Button>
-         </children>
-      </VBox>
-   </right>
-   <center>
-      <Pane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: black;" BorderPane.alignment="CENTER">
-         <children>
-            <ImageView fitHeight="287.0" fitWidth="438.0" layoutY="24.0" pickOnBounds="true" smooth="false">
-               <image>
-                  <Image url="@logo.png" />
-               </image>
-            </ImageView>
-            <Label layoutX="71.0" layoutY="280.0" prefHeight="21.0" prefWidth="325.0" text="Quick Cross Platform File Sharing Application" textFill="WHITE">
-               <font>
-                  <Font size="15.0" />
+                  <Font name="System Bold" size="14.0" />
                </font>
             </Label>
+            <Label layoutX="54.0" layoutY="240.0" prefHeight="21.0" prefWidth="90.0" text="Password">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <TextField layoutX="54.0" layoutY="200.0" prefHeight="25.0" prefWidth="251.0" />
+            <PasswordField layoutX="54.0" layoutY="267.0" prefHeight="25.0" prefWidth="250.0" />
+            <Button centerShape="false" layoutX="226.0" layoutY="316.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="77.0" style="-fx-border-radius: 2px; -fx-background-color: #0096FF; -fx-border-width: 3px;" text="Login" textFill="WHITE">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+            <Button layoutX="41.0" layoutY="445.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="230.0" style="-fx-background-color: white;" text="Dont't have an account? ">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+            <Label layoutX="260.0" layoutY="435.0" textFill="WHITE" underline="true">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Button layoutX="233.0" layoutY="451.0" mnemonicParsing="false" onAction="#switchToRegisterPage" prefHeight="29.0" prefWidth="111.0" style="-fx-background-color: white;" text="Register here" underline="true">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
          </children>
-         <BorderPane.margin>
-            <Insets />
-         </BorderPane.margin>
-      </Pane>
-   </center>
+      </AnchorPane>
+   </left>
+   <right>
+      <AnchorPane prefHeight="551.0" prefWidth="369.0" style="-fx-background-color: black;" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="550.0" fitWidth="370.0" layoutX="-1.0" layoutY="-1.0" pickOnBounds="true">
+               <image>
+                  <Image url="@Login-Landing.png" />
+               </image>
+            </ImageView>
+         </children></AnchorPane>
+   </right>
 </BorderPane>
