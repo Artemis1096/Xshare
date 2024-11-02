@@ -66,7 +66,7 @@ public class ServerFile {
                 latch.countDown();
 
                 // Add client to the thread pool for handling later
-
+                pool.execute(new ClientHandler(clientSocket, FILE_PATH, latch, aesKey));
             }
 
             // Wait until all clients are connected
@@ -92,3 +92,70 @@ public class ServerFile {
     }
 }
 
+class ClientHandler implements Runnable {
+    private static final int BUFFER_SIZE = 64 * 1024;
+    private final Socket clientSocket;
+    private final String filePath;
+    private final SecretKey aesKey;
+    private final CountDownLatch latch;
+
+    public ClientHandler(Socket socket, String filePath, CountDownLatch latch, SecretKey aesKey) {
+        this.clientSocket = socket;
+        this.filePath = filePath;
+        this.aesKey = aesKey;
+        this.latch = latch;
+    }
+
+    @Override
+    public void run() {
+        try {
+            // Wait for all clients to connect
+            latch.await();
+
+            try (DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+                 FileInputStream fileInputStream = new FileInputStream(filePath)) {
+
+                // Send the file name and AES key to the client
+                File file = new File(filePath);
+                dataOutputStream.writeUTF(file.getName());
+                dataOutputStream.writeUTF(Base64.getEncoder().encodeToString(aesKey.getEncoded()));  // Send AES key
+                dataOutputStream.flush();
+
+                // Initialize AES Cipher with padding
+                Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+
+                byte[] buffer = new byte[BUFFER_SIZE];
+                int bytesRead;
+
+                // Transfer file in encrypted chunks
+                while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                    byte[] encryptedData = cipher.update(buffer, 0, bytesRead);
+
+//                    this is to test that encryption works (uncomment to test)
+//                    System.out.println("Encrypted data sample (base64): " + Base64.getEncoder().encodeToString(encryptedData).substring(0, 50)); // Only printing a part
+
+                    if (encryptedData != null) {
+                        dataOutputStream.write(encryptedData);
+                        dataOutputStream.flush();
+                    }
+                }
+                byte[] finalBlock = cipher.doFinal();
+                if (finalBlock != null) {
+                    dataOutputStream.write(finalBlock);
+                    dataOutputStream.flush();
+                }
+
+                System.out.println("File sent! ");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                clientSocket.close();
+            }
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
