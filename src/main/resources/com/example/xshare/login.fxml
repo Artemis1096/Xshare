@@ -10,44 +10,39 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="550.0" maxWidth="720.0" minHeight="550.0" minWidth="720.0" prefHeight="550.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.xshare.backend.controllers.RegisterController">
+<BorderPane maxHeight="550.0" maxWidth="720.0" minHeight="550.0" minWidth="720.0" prefHeight="550.0" prefWidth="720.0" style="-fx-background-color: #EDEADE;" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.xshare.SceneController">
    <left>
-      <AnchorPane prefHeight="550.0" prefWidth="351.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="550.0" prefWidth="351.0" style="-fx-background-color: #FFFFFF;" BorderPane.alignment="CENTER">
          <children>
             <Label layoutX="54.0" layoutY="170.0" prefHeight="23.0" prefWidth="108.0" text="Username">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <Label layoutX="54.0" layoutY="307.0" prefHeight="21.0" prefWidth="90.0" text="Password">
+            <Label layoutX="54.0" layoutY="240.0" prefHeight="21.0" prefWidth="90.0" text="Password">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <!-- Username TextField with fx:id -->
-            <TextField fx:id="usernameField" layoutX="54.0" layoutY="201.0" prefHeight="25.0" prefWidth="251.0" />
-            <!-- PasswordField with fx:id -->
-            <PasswordField fx:id="passwordField" layoutX="54.0" layoutY="335.0" prefHeight="25.0" prefWidth="250.0" />
-            <Label layoutX="54.0" layoutY="240.0" prefHeight="23.0" prefWidth="108.0" text="Email">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <!-- Email TextField with fx:id -->
-            <TextField fx:id="emailField" layoutX="54.0" layoutY="267.0" prefHeight="25.0" prefWidth="251.0" />
-            <!-- Sign Up Button with fx:id and action -->
-            <Button fx:id="signUpButton" centerShape="false" layoutX="227.0" layoutY="377.0" mnemonicParsing="false" onAction="#handleSignUp" prefHeight="36.0" prefWidth="77.0" style="-fx-border-radius: 2px; -fx-background-color: purple; -fx-border-width: 3px;" text="Sign Up" textFill="WHITE">
+            <!-- Add fx:id for usernameField and passwordField -->
+            <TextField fx:id="usernameField" layoutX="54.0" layoutY="200.0" prefHeight="25.0" prefWidth="251.0" />
+            <PasswordField fx:id="passwordField" layoutX="54.0" layoutY="267.0" prefHeight="25.0" prefWidth="250.0" />
+            <Button centerShape="false" layoutX="226.0" layoutY="316.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="36.0" prefWidth="77.0" style="-fx-border-radius: 2px; -fx-background-color: purple; -fx-border-width: 3px;" text="Login" textFill="WHITE">
                <font>
                   <Font size="16.0" />
                </font>
             </Button>
-            <Button layoutX="28.0" layoutY="445.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="243.0" style="-fx-background-color: white;" text="Already have an account? ">
+            <Button layoutX="41.0" layoutY="445.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="230.0" style="-fx-background-color: white;" text="Don't have an account? ">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Button>
-            <!-- Switch to Login Page Button with action -->
-            <Button layoutX="233.0" layoutY="451.0" mnemonicParsing="false" onAction="#switchToLoginPage" prefHeight="29.0" prefWidth="111.0" style="-fx-background-color: white;" text="Login here" underline="true">
+            <Label layoutX="260.0" layoutY="435.0" textFill="WHITE" underline="true">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Button layoutX="233.0" layoutY="451.0" mnemonicParsing="false" onAction="#switchToRegisterPage" prefHeight="29.0" prefWidth="111.0" style="-fx-background-color: white;" text="Register here" underline="true">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
@@ -57,7 +52,7 @@
                   <Image url="@../../../../../../../../../../Users/Arshit.JASHANPREET/Downloads/Free%20Logo%20%5Bfrom%20www.logo.im%5D.png" />
                </image>
             </ImageView>
-            <Label layoutX="105.0" layoutY="48.0" prefHeight="36.0" prefWidth="113.0" text="Xtranfer" textFill="#33076e">
+            <Label layoutX="105.0" layoutY="48.0" prefHeight="36.0" prefWidth="113.0" text="Xshare" textFill="#33076e">
                <font>
                   <Font name="System Bold" size="25.0" />
                </font>
@@ -66,7 +61,7 @@
       </AnchorPane>
    </left>
    <right>
-      <AnchorPane prefHeight="550.0" prefWidth="372.0" style="-fx-background-color: black;" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="551.0" prefWidth="369.0" style="-fx-background-color: black;" BorderPane.alignment="CENTER">
          <children>
             <ImageView fitHeight="550.0" fitWidth="370.0" layoutX="-1.0" layoutY="-1.0" pickOnBounds="true">
                <image>
@@ -83,7 +78,7 @@
                   <Font name="System Bold" size="37.0" />
                </font>
             </Label>
-            <Label layoutX="28.0" layoutY="195.0" text="Signup to Get Started" textFill="WHITE">
+            <Label layoutX="28.0" layoutY="195.0" text="Login to access your account" textFill="WHITE">
                <font>
                   <Font size="19.0" />
                </font>
