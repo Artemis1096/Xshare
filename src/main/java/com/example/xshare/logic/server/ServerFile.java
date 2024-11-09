@@ -1,87 +1,190 @@
 package com.example.xshare.logic.server;
 
+import com.example.xshare.ServerFileController;
+import com.example.xshare.logic.server.ClientConnectionObserver;
+import org.apache.catalina.Server;
+
 import javax.crypto.*;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
+
+import static com.example.xshare.logic.server.ZipCreator.zipFolder;
+
 
 public class ServerFile {
-    private static final int PORT = 3000;
-    private static final String FILE_PATH = "cc.pdf";
-    private static final int EXPECTED_CLIENTS = 1; // Set the number of clients to wait for
-    private static final int BUFFER_SIZE = 64 * 1024; // 64 KB buffer
-    private static CountDownLatch latch = new CountDownLatch(EXPECTED_CLIENTS);
-    private static ExecutorService pool = Executors.newFixedThreadPool(EXPECTED_CLIENTS);
+    private static final int PORT = 3000; // Port for file transfer
+    private static final int SERVER_NAME_ACCESS_PORT = 3001; // Port for server name
+    private static final int SERVER_AVAILABLE_PORT = 3002; // Port for server availability
+    private static List<String> FILE_PATH = new ArrayList<>();
+    private static final String SERVER_NAME = System.getProperty("user.name"); // Custom server name
+    private static ExecutorService pool = Executors.newCachedThreadPool();
+    private static List<Socket> connectedClients = new ArrayList<>();
+    private static AtomicBoolean transferTriggered = new AtomicBoolean(false);
+    private static final List<ClientConnectionObserver> observers = new ArrayList<>();
+    static String ClientName = "Unknown";
+    private SecretKey aesKey;
 
-    public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Server started. Waiting for clients...");
+    public ServerFile() throws IOException {
+        this.aesKey = generateAESKey(); // Generate AES key on instantiation
+    }
+    public void setFiles(List<String>FILE_PATH){
+        this.FILE_PATH = FILE_PATH;
+        for(String s:FILE_PATH){
+            System.out.println(s);
+        }
+    }
+    // Start method to initialize server components
+    public void start() {
+        // Start three threads for each server task
+        new Thread(() -> listenForServerNameRequests(SERVER_NAME_ACCESS_PORT)).start();
+        new Thread(() -> listenForServerAvailabilityRequests(SERVER_AVAILABLE_PORT)).start();
+        new Thread(() -> listenForFileTransfers(PORT, aesKey)).start();
 
-            // Generate the AES key
-            SecretKey aesKey = generateAESKey();
-            String encodedKey = Base64.getEncoder().encodeToString(aesKey.getEncoded());
-//            System.out.println("AES Key generated and encoded: " + encodedKey);
+        // Start a thread to listen for the "SEND" command from the console
+        new Thread(ServerFile::listenForSendCommand).start();
+    }
 
-            // Accept the expected number of clients
-            for (int i = 0; i < EXPECTED_CLIENTS; i++) {
-                Socket clientSocket = serverSocket.accept();
+    public List<Socket> getConnectedClients() {
+        return Collections.unmodifiableList(connectedClients); // Provides a safe copy for UI
+    }
 
-                //getting the IP address
-                InetSocketAddress socketAddress = (InetSocketAddress) clientSocket.getRemoteSocketAddress();
-                InetAddress clientAddress = socketAddress.getAddress();
-                String clientIpAddress = clientAddress.getHostAddress();
-                String clientHostname = "";
-                Boolean hostnameFetched = false;
-                //hostname from IP
-                try {
-                    // Define the shell command with the variable IP address
-                    String command = "host " + clientIpAddress + " | grep -v '\\.local' | awk '/domain name pointer/ {print $5}' | sed 's/\\.$//'";
+    public static void addObserver(ClientConnectionObserver observer) {
+        observers.add(observer);
+    }
 
-                    // Use ProcessBuilder to run the shell command
-                    ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
-                    Process process = processBuilder.start();
-
-                    // Capture the output of the command
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    StringBuilder output = new StringBuilder();
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        output.append(line).append(" ");
-                    }
-                    // Wait for the process to finish
-                    process.waitFor();
-                    String hostname = output.toString().trim();
-                    hostnameFetched=true;
-                    System.out.println(hostname + " Connected");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if(!hostnameFetched)
-                    System.out.println(clientAddress + " Connected");
-
-                // Decrement the latch count when a client connects
-                latch.countDown();
-
-                // Add client to the thread pool for handling later
-                pool.execute(new ClientHandler(clientSocket, FILE_PATH, latch, aesKey));
-            }
-
-            // Wait until all clients are connected
-            latch.await();
-            System.out.println("All clients connected. Starting file transfer to all clients...");
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            pool.shutdown();
-            System.out.println("Server has stopped.");
+    static void notifyClientConnected(String clientName) {
+        for (ClientConnectionObserver observer : observers) {
+            observer.onClientConnected(clientName);
         }
     }
 
-    private static SecretKey generateAESKey() throws IOException {
+    private static void notifyClientDisconnected(String clientInfo) {
+        for (ClientConnectionObserver observer : observers) {
+            observer.onClientDisconnected(clientInfo);
+        }
+    }
+
+
+    public void triggerFileTransfer() {
+        transferTriggered.set(true); // Start file transfer when called
+    }
+
+    public static void removeClient(String clientIp) {
+        Optional<Socket> clientToRemove = connectedClients.stream()
+                .filter(client -> client.getInetAddress().getHostAddress().equals(clientIp))
+                .findFirst();
+
+        if (clientToRemove.isPresent()) {
+            try {
+                clientToRemove.get().close();
+                connectedClients.remove(clientToRemove.get());
+                System.out.println("Client " + clientIp + " has been disconnected.");
+            } catch (IOException e) {
+                System.err.println("Error disconnecting client " + clientIp + ": " + e.getMessage());
+            }
+        } else {
+            System.out.println("No client found with IP address: " + clientIp);
+        }
+    }
+
+    private static void listenForSendCommand() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Commands: 'SEND' to start file transfer, 'LIST' to view clients, 'REMOVE <IP>' to disconnect a client.");
+
+        while (!transferTriggered.get() && scanner.hasNextLine()) {
+            String command = scanner.nextLine().trim();
+
+            if ("SEND".equalsIgnoreCase(command)) {
+                transferTriggered.set(true);
+                System.out.println("File transfer triggered.");
+            } else if ("LIST".equalsIgnoreCase(command)) {
+                listConnectedClients();
+            } else if (command.startsWith("REMOVE ")) {
+                String clientIp = command.substring(7).trim();
+                removeClient(clientIp);
+            } else {
+                System.out.println("Invalid command. Type 'SEND', 'LIST', or 'REMOVE <IP>'.");
+            }
+        }
+    }
+
+    private static void listConnectedClients() {
+        if (connectedClients.isEmpty()) {
+            System.out.println("No clients currently connected.");
+        } else {
+            System.out.println("Connected clients:");
+            for (Socket client : connectedClients) {
+                System.out.println("- " + client.getInetAddress().getHostAddress());
+            }
+        }
+    }
+
+    static void listenForServerNameRequests(int port) {
+        try (ServerSocket serverNameSocket = new ServerSocket(port)) {
+            System.out.println("Listening for server name requests on port " + port + "...");
+
+            while (true) {
+                Socket clientSocket = serverNameSocket.accept();
+                try (DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
+                    out.writeUTF(SERVER_NAME); // Send the server name to the client
+                    out.flush();
+                    System.out.println("Sent server name to client: " + clientSocket.getInetAddress());
+                } finally {
+                    clientSocket.close();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error in server name request handler: " + e.getMessage());
+        }
+    }
+
+    static void listenForServerAvailabilityRequests(int port) {
+        try (ServerSocket availabilitySocket = new ServerSocket(port)) {
+            System.out.println("Listening for availability requests on port " + port + "...");
+
+            while (true) {
+                Socket clientSocket = availabilitySocket.accept();
+                try (DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
+                    boolean isAvailable = !transferTriggered.get(); // Server is available if transfer not triggered
+                    out.writeBoolean(isAvailable); // Send availability status to client
+                    out.flush();
+                    System.out.println("Sent availability status (" + isAvailable + ") to client: " + clientSocket.getInetAddress());
+                } finally {
+                    clientSocket.close();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error in server availability request handler: " + e.getMessage());
+        }
+    }
+
+    static void listenForFileTransfers(int port, SecretKey aesKey) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Server ready for file transfers on port " + port + ".");
+
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                connectedClients.add(clientSocket);
+
+                String clientIpAddress = clientSocket.getInetAddress().getHostAddress();
+                System.out.println("Client connected for file transfer: " + clientIpAddress);
+
+                // Handle file transfer in a new thread
+                pool.execute(new ClientHandler(clientSocket, FILE_PATH, aesKey, transferTriggered, SERVER_NAME));
+            }
+        } catch (IOException e) {
+            System.err.println("Error in file transfer handler: " + e.getMessage());
+        }
+    }
+
+    static SecretKey generateAESKey() throws IOException {
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
             keyGen.init(128, new SecureRandom());
@@ -93,69 +196,118 @@ public class ServerFile {
 }
 
 class ClientHandler implements Runnable {
-    private static final int BUFFER_SIZE = 64 * 1024;
+    private static final int BUFFER_SIZE = 64 * 1024; // 64 KB buffer size for file transfer
     private final Socket clientSocket;
-    private final String filePath;
+    private final List<String> filePaths;
     private final SecretKey aesKey;
-    private final CountDownLatch latch;
+    private final AtomicBoolean transferTriggered;
+    private final String serverName;
+    private ServerFileController controller = new ServerFileController();
 
-    public ClientHandler(Socket socket, String filePath, CountDownLatch latch, SecretKey aesKey) {
+    public ClientHandler(Socket socket, List<String> filePaths, SecretKey aesKey, AtomicBoolean transferTriggered, String serverName) {
         this.clientSocket = socket;
-        this.filePath = filePath;
+        this.filePaths = filePaths;
         this.aesKey = aesKey;
-        this.latch = latch;
+        this.transferTriggered = transferTriggered;
+        this.serverName = serverName;
+        this.controller = controller;
     }
 
     @Override
     public void run() {
-        try {
-            // Wait for all clients to connect
-            latch.await();
+        System.out.println("Started");
+        try (DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
+             DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream())) {
 
-            try (DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
-                 FileInputStream fileInputStream = new FileInputStream(filePath)) {
+            String clientName = dataInputStream.readUTF();
+            ServerFile.ClientName = clientName;
+            ServerFile.notifyClientConnected(clientName);
 
-                // Send the file name and AES key to the client
-                File file = new File(filePath);
-                dataOutputStream.writeUTF(file.getName());
-                dataOutputStream.writeUTF(Base64.getEncoder().encodeToString(aesKey.getEncoded()));  // Send AES key
-                dataOutputStream.flush();
+            System.out.println("Client connected for file transfer: " + "clientUsername" + " (" + clientSocket.getRemoteSocketAddress() + ")");
 
-                // Initialize AES Cipher with padding
-                Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-                cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+            // Send server name to client for display
+            dataOutputStream.writeUTF(serverName);
+            dataOutputStream.flush();
 
-                byte[] buffer = new byte[BUFFER_SIZE];
-                int bytesRead;
 
-                // Transfer file in encrypted chunks
-                while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                    byte[] encryptedData = cipher.update(buffer, 0, bytesRead);
-
-//                    this is to test that encryption works (uncomment to test)
-//                    System.out.println("Encrypted data sample (base64): " + Base64.getEncoder().encodeToString(encryptedData).substring(0, 50)); // Only printing a part
-
-                    if (encryptedData != null) {
-                        dataOutputStream.write(encryptedData);
-                        dataOutputStream.flush();
-                    }
-                }
-                byte[] finalBlock = cipher.doFinal();
-                if (finalBlock != null) {
-                    dataOutputStream.write(finalBlock);
-                    dataOutputStream.flush();
-                }
-
-                System.out.println("File sent! ");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                clientSocket.close();
+            // Wait until transfer is triggered
+            while (!transferTriggered.get()) {
+                Thread.sleep(100); // Wait and check the flag periodically
             }
 
+            // Begin file transfer
+            for (String filePath : filePaths) {
+                sendFile(dataOutputStream, filePath);
+            }
+            // Signal end of file transfer
+            dataOutputStream.writeUTF("END_OF_TRANSFER");
+            dataOutputStream.flush();
+
+
+            System.out.println("All files sent to client: " + clientSocket.getRemoteSocketAddress());
         } catch (IOException | InterruptedException e) {
+            System.err.println("Error in ClientHandler connection setup: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                System.err.println("Error closing client socket: " + e.getMessage());
+            }
+        }
+
+    }
+
+    private void sendFile(DataOutputStream dataOutputStream, String filePath) {
+        File file = new File(filePath);
+        if (file.isDirectory()) {
+            try {
+                zipFolder(Paths.get(filePath));
+                filePath = filePath + ".zip";
+            } catch (IOException e) {
+                System.err.println("Error creating ZIP file: " + e.getMessage());
+            }
+        }
+        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+            // Send file metadata first
+            dataOutputStream.writeUTF(file.getName());  // Send the file name
+            dataOutputStream.writeLong(file.length()); //send file size
+            dataOutputStream.writeUTF(Base64.getEncoder().encodeToString(aesKey.getEncoded())); // Send AES key
+            dataOutputStream.flush();
+
+            // Initialize AES cipher for encryption
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int bytesRead;
+
+            // Read file data, encrypt, and send in chunks
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                byte[] encryptedData = cipher.update(buffer, 0, bytesRead);
+                if (encryptedData != null) {
+                    dataOutputStream.writeInt(encryptedData.length); // Send length of encrypted chunk
+                    dataOutputStream.write(encryptedData);           // Send encrypted chunk
+                    dataOutputStream.flush();
+                }
+            }
+
+            // Finalize encryption and send any remaining bytes
+            byte[] finalBlock = cipher.doFinal();
+            if (finalBlock != null && finalBlock.length > 0) {
+                dataOutputStream.writeInt(finalBlock.length); // Send length of final block
+                dataOutputStream.write(finalBlock);           // Send final encrypted chunk
+                dataOutputStream.flush();
+            }
+
+            // Signal end of this file
+            dataOutputStream.writeInt(-1); // Send -1 as marker to indicate end of file
+            dataOutputStream.flush();
+
+            System.out.println("File sent: " + file.getName());
+
+        } catch (IOException | GeneralSecurityException e) {
+            System.err.println("Error sending file: " + e.getMessage());
         }
     }
 }
