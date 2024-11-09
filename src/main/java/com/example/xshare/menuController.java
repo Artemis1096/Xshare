@@ -1,7 +1,8 @@
 package com.example.xshare;
 
+import com.example.xshare.logic.client.ClientFile;
+import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,16 +13,21 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.event.ActionEvent;
 import javafx.util.Duration;
+import javafx.scene.image.ImageView;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
-public class menuController implements Initializable {
+public class menuController  implements Initializable {
     @FXML
     public ListView<String> serverListView;
 
@@ -29,7 +35,10 @@ public class menuController implements Initializable {
     private Label statusLabel;
     @FXML
     private Button receiveFileButton;
-
+    @FXML
+    private AnchorPane vbox1,vbox2;
+    private boolean isMenuOpen = false;
+    private boolean dashboardIsOpen = false;
     @FXML
     private AnchorPane pane1, pane2;
 
@@ -48,12 +57,34 @@ public class menuController implements Initializable {
         tte2.setFromX(-90);
         tte2.play();
         menu.setOnMouseClicked((event) -> {
-            pane1.setVisible(true);
-            TranslateTransition tt2 = new TranslateTransition(Duration.seconds(0.5), pane2);
-            tt2.setFromX(0);
-            tt2.play();
-            tte2.setFromX(0);
-            tte2.play();
+            if (isMenuOpen) {
+                // Close the menu
+                TranslateTransition ttClose = new TranslateTransition(Duration.seconds(0.5), pane2);
+                ttClose.setFromX(0);
+                ttClose.setToX(-600);
+                ttClose.play();
+
+                TranslateTransition tte2Close = new TranslateTransition(Duration.seconds(0.5), pane1);
+                tte2Close.setFromX(0);
+                tte2Close.setToX(-90);
+                tte2Close.play();
+
+                isMenuOpen = false;
+            } else {
+                // Open the menu
+                pane1.setVisible(true);
+                TranslateTransition ttOpen = new TranslateTransition(Duration.seconds(0.5), pane2);
+                ttOpen.setFromX(-600);
+                ttOpen.setToX(0);
+                ttOpen.play();
+
+                TranslateTransition tte2Open = new TranslateTransition(Duration.seconds(0.5), pane1);
+                tte2Open.setFromX(-90);
+                tte2Open.setToX(0);
+                tte2Open.play();
+
+                isMenuOpen = true;
+            }
         });
         pane1.setOnMouseClicked((event) -> {
             TranslateTransition tt3 = new TranslateTransition(Duration.seconds(0.5), pane2);
@@ -62,6 +93,17 @@ public class menuController implements Initializable {
             tte2.setFromX(-90);
             tte2.play();
         });
+    }
+    @FXML
+    private void openAccountDashboard(){
+        if(dashboardIsOpen==false){
+            vbox1.setVisible(false);
+            vbox2.setVisible(true);
+        }
+        else{
+            vbox1.setVisible(true);
+            vbox2.setVisible(false);
+        }
     }
 
     @FXML
