@@ -47,14 +47,14 @@
                </font>
             </Button>
             <!-- Switch to Login Page Button with action -->
-            <Button layoutX="233.0" layoutY="451.0" mnemonicParsing="false" onAction="#switchToLoginPage" prefHeight="29.0" prefWidth="111.0" style="-fx-background-color: white;" text="Login here" underline="true">
+            <Button layoutX="232.0" layoutY="452.0" mnemonicParsing="false" onAction="#switchToLoginPage" prefHeight="29.0" prefWidth="111.0" style="-fx-background-color: white;" text="Login here" underline="true">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Button>
             <ImageView fitHeight="69.0" fitWidth="77.0" layoutX="28.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../../../../../../../../../../Users/Arshit.JASHANPREET/Downloads/Free%20Logo%20%5Bfrom%20www.logo.im%5D.png" />
+                  <Image url="@images/logo-app.png" />
                </image>
             </ImageView>
             <Label layoutX="105.0" layoutY="48.0" prefHeight="36.0" prefWidth="113.0" text="Xtranfer" textFill="#33076e">
