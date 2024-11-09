@@ -35,7 +35,7 @@ public class LoginController {
             if (loginSuccessful) {
                 showAlert("Login Successful", "Welcome, " + username + "!");
                 // Navigate to the main application scene
-//                sceneController.switchToMainPage(event);
+                sceneController.switchToMainPage(event);
             } else {
                 showAlert("Login Failed", "Invalid credentials. Please try again.");
             }
