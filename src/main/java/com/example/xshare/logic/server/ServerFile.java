@@ -1,9 +1,5 @@
 package com.example.xshare.logic.server;
-
 import com.example.xshare.ServerFileController;
-import com.example.xshare.logic.server.ClientConnectionObserver;
-import org.apache.catalina.Server;
-
 import javax.crypto.*;
 import java.io.*;
 import java.net.*;
@@ -14,9 +10,7 @@ import java.util.Base64;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.*;
-
 import static com.example.xshare.logic.server.ZipCreator.zipFolder;
-
 
 public class ServerFile {
     private static final int PORT = 3000; // Port for file transfer
@@ -196,7 +190,7 @@ public class ServerFile {
 }
 
 class ClientHandler implements Runnable {
-    private static final int BUFFER_SIZE = 64 * 1024; // 64 KB buffer size for file transfer
+    private static final int BUFFER_SIZE = 128 * 1024; // 64 KB buffer size for file transfer
     private final Socket clientSocket;
     private final List<String> filePaths;
     private final SecretKey aesKey;
@@ -258,56 +252,57 @@ class ClientHandler implements Runnable {
 
     }
 
-    private void sendFile(DataOutputStream dataOutputStream, String filePath) {
-        File file = new File(filePath);
-        if (file.isDirectory()) {
-            try {
-                zipFolder(Paths.get(filePath));
-                filePath = filePath + ".zip";
-            } catch (IOException e) {
-                System.err.println("Error creating ZIP file: " + e.getMessage());
-            }
-        }
-        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-            // Send file metadata first
-            dataOutputStream.writeUTF(file.getName());  // Send the file name
-            dataOutputStream.writeLong(file.length()); //send file size
-            dataOutputStream.writeUTF(Base64.getEncoder().encodeToString(aesKey.getEncoded())); // Send AES key
-            dataOutputStream.flush();
-
-            // Initialize AES cipher for encryption
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, aesKey);
-
-            byte[] buffer = new byte[BUFFER_SIZE];
-            int bytesRead;
-
-            // Read file data, encrypt, and send in chunks
-            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                byte[] encryptedData = cipher.update(buffer, 0, bytesRead);
-                if (encryptedData != null) {
-                    dataOutputStream.writeInt(encryptedData.length); // Send length of encrypted chunk
-                    dataOutputStream.write(encryptedData);           // Send encrypted chunk
-                    dataOutputStream.flush();
-                }
-            }
-
-            // Finalize encryption and send any remaining bytes
-            byte[] finalBlock = cipher.doFinal();
-            if (finalBlock != null && finalBlock.length > 0) {
-                dataOutputStream.writeInt(finalBlock.length); // Send length of final block
-                dataOutputStream.write(finalBlock);           // Send final encrypted chunk
-                dataOutputStream.flush();
-            }
-
-            // Signal end of this file
-            dataOutputStream.writeInt(-1); // Send -1 as marker to indicate end of file
-            dataOutputStream.flush();
-
-            System.out.println("File sent: " + file.getName());
-
-        } catch (IOException | GeneralSecurityException e) {
-            System.err.println("Error sending file: " + e.getMessage());
+private void sendFile(DataOutputStream dataOutputStream, String filePath) {
+    File file = new File(filePath);
+    if (file.isDirectory()) {
+        try {
+            zipFolder(Paths.get(filePath));
+            filePath = filePath + ".zip";
+        } catch (IOException e) {
+            System.err.println("Error creating ZIP file: " + e.getMessage());
         }
     }
+    try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+
+        // Send file metadata first
+        dataOutputStream.writeUTF(file.getName());  // Send the file name
+        dataOutputStream.writeLong(file.length()); //send file size
+        dataOutputStream.writeUTF(Base64.getEncoder().encodeToString(aesKey.getEncoded())); // Send AES key
+        dataOutputStream.flush();
+
+        // Initialize AES cipher for encryption
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+
+        byte[] buffer = new byte[BUFFER_SIZE];
+        int bytesRead;
+
+        // Read file data, encrypt, and send in chunks
+        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+            byte[] encryptedData = cipher.update(buffer, 0, bytesRead);
+            if (encryptedData != null) {
+                dataOutputStream.writeInt(encryptedData.length); // Send length of encrypted chunk
+                dataOutputStream.write(encryptedData);           // Send encrypted chunk
+                dataOutputStream.flush();
+            }
+        }
+
+        // Finalize encryption and send any remaining bytes
+        byte[] finalBlock = cipher.doFinal();
+        if (finalBlock != null && finalBlock.length > 0) {
+            dataOutputStream.writeInt(finalBlock.length); // Send length of final block
+            dataOutputStream.write(finalBlock);           // Send final encrypted chunk
+            dataOutputStream.flush();
+        }
+
+        // Signal end of this file
+        dataOutputStream.writeInt(-1); // Send -1 as marker to indicate end of file
+        dataOutputStream.flush();
+
+        System.out.println("File sent: " + file.getName());
+
+    } catch (IOException | GeneralSecurityException e) {
+        System.err.println("Error sending file: " + e.getMessage());
+    }
+}
 }
