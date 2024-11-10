@@ -47,7 +47,7 @@
                </font>
             </Button>
             <!-- Switch to Login Page Button with action -->
-            <Button layoutX="232.0" layoutY="452.0" mnemonicParsing="false" onAction="#switchToLoginPage" prefHeight="29.0" prefWidth="111.0" style="-fx-background-color: white;" text="Login here" underline="true">
+            <Button layoutX="233.0" layoutY="451.0" mnemonicParsing="false" onAction="#switchToLoginPage" prefHeight="29.0" prefWidth="111.0" style="-fx-background-color: white;" text="Login here" underline="true">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
