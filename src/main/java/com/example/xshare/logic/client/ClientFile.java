@@ -1,6 +1,8 @@
 package com.example.xshare.logic.client;
 
+
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,36 +11,37 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Collectors;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
-public class ClientFile {
+public class ClientFile{
     private static final int SERVER_PORT = 3000; // File transfer port
     private static final int SERVER_NAME_ACCESS_PORT = 3001;
     private static final int SERVER_AVAILABLE_PORT = 3002;
     private static final int BUFFER_SIZE = 65536;
-    private static final long PROGRESS_THRESHOLD = 10485760L;
-    private static final String USERNAME = "Sasuke";
+    private static final long PROGRESS_THRESHOLD = 1048576L;
+    private static final String USERNAME = System.getProperty("user.name");
+    private static final Set<FileTransferCallback> observers = new HashSet<>();
 
+    public static void addObserver(FileTransferCallback observer) { observers.add(observer);}
 
-    public static List<String> scanForServers() {
-        String subnet = getSubnet();
-        if (subnet == null) {
-            System.out.println("Could not determine the subnet.");
-            return Collections.emptyList();
+    public static void notifyCompletion(String filename,double fileSize) {
+        System.out.println("notify completion" + observers.size());
+        for(FileTransferCallback observer : observers) {
+            observer.onTransferComplete(filename,fileSize);
         }
+    }
 
-        // Scan the network for servers
-        ConcurrentSkipListSet<String> serverAddresses = NetworkScanner.scan(subnet + ".0", 254);
-
-        // Check server availability and retrieve names
-        return serverAddresses.stream()
-                .filter(ClientFile::isServerAvailable)
-                .map(ClientFile::getServerName)
-                .collect(Collectors.toList());
+    public static void notifyFailure(String filename) {
+        for(FileTransferCallback observer : observers) {
+            observer.onTransferFailed(filename);
+        }
+    }
+    public static void notifyProgress(String filename, double progress) {
+        for (FileTransferCallback observer : observers) {
+            observer.onProgressUpdate(filename, progress);
+        }
     }
 
     public static void initiateFileTransfer(String chosenServer) {
@@ -47,9 +50,11 @@ public class ClientFile {
             socket.setSoTimeout(30000); // Set a timeout for the file transfer connection
 
             // Send client username to the server
-            try (DataInputStream dataInputStream = new DataInputStream(socket.getInputStream())) {
+            try (DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                 DataInputStream dataInputStream = new DataInputStream(socket.getInputStream())) {
 
-//                dataOutputStream.writeUTF(USERNAME); // Send the username to the server
+                dataOutputStream.writeUTF(USERNAME); // Send the username to the server
+                dataOutputStream.flush(); // Send the username to the server
 
                 dataInputStream.readUTF(); // Skip the server name confirmation
                 while (true) {
@@ -61,6 +66,9 @@ public class ClientFile {
                         System.out.println("All files have been successfully received.");
                         break;
                     }
+                    // Read the file size
+                    long fileSize = dataInputStream.readLong();
+                    System.out.printf("Receiving file '%s' of size %.2f MB%n", fileName, fileSize / 1048576.0);
 
                     // Decode the AES key for the file
                     String encodedKey = dataInputStream.readUTF();
@@ -92,9 +100,14 @@ public class ClientFile {
                                 bytesReadTotal += decryptedData.length;
 
                                 if (bytesReadTotal - lastProgressDisplay >= PROGRESS_THRESHOLD) {
-                                    System.out.printf("Received: %.2f MB%n", bytesReadTotal / 1048576.0);
+                                    double progressPercentage = (((double) bytesReadTotal / fileSize) * 100);
+                                    double progressInMB = bytesReadTotal / 1048576.0;
+                                    System.out.printf("Received: %.2f MB (%.2f%%)%n", progressInMB, progressPercentage);
+
                                     lastProgressDisplay = bytesReadTotal;
+                                    notifyProgress(fileName, progressPercentage);
                                 }
+
                             }
                         }
 
@@ -104,16 +117,18 @@ public class ClientFile {
                             fileOutputStream.write(finalBlock);
                             bytesReadTotal += finalBlock.length;
                         }
-
+                        notifyCompletion(fileName,bytesReadTotal);
                         System.out.printf("File '%s' received successfully. Total size: %.2f MB%n", fileName, bytesReadTotal / 1048576.0);
                     }
                 }
             } catch (IOException | GeneralSecurityException e) {
+                notifyFailure(e.getMessage());
                 System.err.println("Error during file reception: " + e.getMessage());
             } finally {
                 socket.close();
             }
         } catch (IOException e) {
+            notifyFailure(e.getMessage());
             System.err.println("Failed to connect to the server: " + e.getMessage());
         }
     }
