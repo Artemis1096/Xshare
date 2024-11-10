@@ -1,8 +1,8 @@
 // UserRepository.java
 package com.example.xshare.backend.repository;
 
-import com.example.xshare.backend.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.xshare.backend.models.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);

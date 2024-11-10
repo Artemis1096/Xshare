@@ -36,6 +36,6 @@ public class NetworkScanner {
             System.out.println(e.getMessage());
         }
 
-        return ipsSet; //krle
+        return ipsSet;
     }
 }

@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="730.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.xshare.ServerFileController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="730.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.xshare.ServerFileController">
     <top>
         <AnchorPane prefHeight="41.0" prefWidth="635.0" style="-fx-background-color: purple;" BorderPane.alignment="CENTER">
             <children>
@@ -46,34 +46,26 @@
     <left>
         <AnchorPane prefHeight="351.0" prefWidth="38.0" BorderPane.alignment="CENTER">
             <children>
-                <ImageView fitHeight="510.0" fitWidth="38.0" layoutY="1.0" pickOnBounds="true">
+                <ImageView fitHeight="509.0" fitWidth="38.0" pickOnBounds="true">
                     <image>
                         <Image url="@images/menu-background.png" />
                     </image>
                 </ImageView>
-                <VBox alignment="TOP_CENTER" layoutY="2.3333333333333335" prefHeight="508.0" prefWidth="38.0" spacing="9.0" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
+                <VBox alignment="TOP_CENTER" layoutY="1.0" prefHeight="508.0" prefWidth="38.0" spacing="15.0" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
                     <children>
-                  <Button mnemonicParsing="false" style="-fx-background-color: none;">
-                     <graphic>
-                              <ImageView fitHeight="28.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
-                                  <image>
-                                      <Image url="@images/account.png" />
-                                  </image>
-                              </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#switchToMainPage" style="-fx-background-color: none;">
-                     <graphic>
-                              <ImageView fitHeight="28.0" fitWidth="23.0" onMouseClicked="#switchToMainPage" pickOnBounds="true" preserveRatio="true">
-                                  <image>
-                                      <Image url="@images/home.png" />
-                                  </image>
-                              </ImageView>
-                     </graphic>
-                  </Button>
+                        <ImageView fitHeight="28.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@images/account.png" />
+                            </image>
+                        </ImageView>
+                        <ImageView fitHeight="28.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@images/home.png" />
+                            </image>
+                        </ImageView>
                     </children>
                     <padding>
-                        <Insets left="-3.0" top="8.0" />
+                        <Insets top="14.0" />
                     </padding>
                 </VBox>
             </children>
@@ -92,7 +84,7 @@
                                 <Insets left="10.0" top="11.0" />
                             </padding>
                         </Button>
-                        <Button alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#switchToMainPage" prefHeight="39.0" prefWidth="170.0" style="-fx-background-color: none;" text="Home">
+                        <Button alignment="BASELINE_LEFT" mnemonicParsing="false" prefHeight="39.0" prefWidth="170.0" style="-fx-background-color: none;" text="Home">
                             <font>
                                 <Font name="System Bold" size="14.0" />
                             </font>
@@ -122,7 +114,7 @@
                         </Button>
                     </children>
                 </AnchorPane>
-                <AnchorPane layoutX="13.0" layoutY="88.0" prefHeight="360.0" prefWidth="510.0" style="-fx-background-color: #CBC3E3ed; -fx-background-radius: 4px;">
+                <AnchorPane layoutX="13.0" layoutY="83.0" prefHeight="360.0" prefWidth="510.0" style="-fx-background-color: #CBC3E3ed; -fx-background-radius: 4px;">
                     <children>
                         <Label layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="147.0" text="Nearby Devices">
                             <font>
@@ -134,24 +126,14 @@
                      <children>
                          <ListView fx:id="clientListView" style="-fx-background-color: #CBC3E3ed;" />
                         <ListView prefHeight="252.0" prefWidth="430.0" style="-fx-background-color: #CBC3E3ed;" />
-                        <Button mnemonicParsing="false" onAction="#handleStartServer" prefHeight="39.0" prefWidth="174.0" style="-fx-background-color: purple;" text="Start Server" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="18.0" />
-                           </font>
-                        </Button>
                      </children>
                   </VBox>
-                  <Button fx:id="sendFileButton" disable="true" layoutX="382.0" layoutY="306.0" mnemonicParsing="false" onAction="#handleSendFile" onMouseClicked="#progressBar" prefHeight="39.0" prefWidth="103.0" style="-fx-background-color: purple;" text="Send" textFill="WHITE">
+                  <Button fx:id="sendFileButton" disable="true" layoutX="382.0" layoutY="306.0" mnemonicParsing="false" onAction="#handleSendFile" prefHeight="39.0" prefWidth="103.0" style="-fx-background-color: purple;" text="Send" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
                   </Button>
-                        <ImageView fitHeight="17.0" fitWidth="15.0" layoutX="161.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@images/WMDx.gif" />
-                            </image>
-                        </ImageView>
-                  <Button fx:id="listClientsButton" disable="true" layoutX="185.0" layoutY="4.0" mnemonicParsing="false" onAction="#handleListClients" prefHeight="27.0" prefWidth="107.0" style="-fx-background-color: purple;" text="Refresh" textFill="WHITE" wrapText="true">
+                  <Button fx:id="listClientsButton" disable="true" layoutX="185.0" layoutY="4.0" mnemonicParsing="false" onAction="#handleListClients" prefHeight="27.0" prefWidth="107.0" style="-fx-background-color: purple;" text="Refresh">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
