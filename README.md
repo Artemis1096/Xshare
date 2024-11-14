@@ -36,8 +36,9 @@ If you encounter a JavaFX-related error, follow these steps:
 
     Ensure JavaFX SDK is Added:
         Check that the JavaFX SDK is incorporated in the Project Structure settings of your IDE.
-
+![screenshot](https://github.com/Artemis1096/Xshare-Softablitz/blob/6380cc1ef8837a4bbd66737db6c92974b428c855/screenshot/project-structure.png)
+    
     Add VM Options to the Project:
         Set the following VM options (replace <path-to-javafx-sdk> with the actual path to your JavaFX SDK):
-
     --module-path <path-to-javafx-sdk>/lib --add-modules javafx.controls,javafx.fxml
+![screenshot](https://github.com/Artemis1096/Xshare-Softablitz/blob/6380cc1ef8837a4bbd66737db6c92974b428c855/screenshot/add-vm.png)
