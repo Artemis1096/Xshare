@@ -42,3 +42,8 @@ If you encounter a JavaFX-related error, follow these steps:
         Set the following VM options (replace <path-to-javafx-sdk> with the actual path to your JavaFX SDK):
     --module-path <path-to-javafx-sdk>/lib --add-modules javafx.controls,javafx.fxml
 ![screenshot](https://github.com/Artemis1096/Xshare-Softablitz/blob/6380cc1ef8837a4bbd66737db6c92974b428c855/screenshot/add-vm.png)
+
+
+Youtube Demo:
+
+[![Watch the tutorial on YouTube](https://img.youtube.com/vi/YErdXhFl8Sw/0.jpg)](https://www.youtube.com/watch?v=YErdXhFl8Sw)
