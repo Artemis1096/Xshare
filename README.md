@@ -40,4 +40,4 @@ If you encounter a JavaFX-related error, follow these steps:
     Add VM Options to the Project:
         Set the following VM options (replace <path-to-javafx-sdk> with the actual path to your JavaFX SDK):
 
---module-path <path-to-javafx-sdk>/lib --add-modules javafx.controls,javafx.fxml
+    --module-path <path-to-javafx-sdk>/lib --add-modules javafx.controls,javafx.fxml
