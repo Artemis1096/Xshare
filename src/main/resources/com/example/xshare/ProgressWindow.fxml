@@ -1,0 +1,11 @@
+<!-- ProgressWindow.fxml -->
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Button?>
+<VBox alignment="CENTER" spacing="10" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.xshare.ProgressWindowController">
+    <Label fx:id="progressLabel" text="File Transfer Progress" />
+    <ProgressBar fx:id="progressBar" prefWidth="300" progress="0.0" />
+    <Button fx:id="cancelButton" text="Cancel" onAction="#handleCancel" />
+</VBox>
+

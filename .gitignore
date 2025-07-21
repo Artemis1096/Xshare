@@ -36,3 +36,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+src/main/java/com/example/xshare/backend/service/credentials.txt
