@@ -1,16 +1,19 @@
 package com.example.xshare.logic.server;
+
 import com.example.xshare.ServerFileController;
+import com.example.xshare.logic.server.ClientConnectionObserver;
+import org.apache.catalina.Server;
+
 import javax.crypto.*;
 import java.io.*;
 import java.net.*;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.*;
-import static com.example.xshare.logic.server.ZipCreator.zipFolder;
+
 
 public class ServerFile {
     private static final int PORT = 3000; // Port for file transfer
@@ -253,16 +256,8 @@ class ClientHandler implements Runnable {
     }
 
 private void sendFile(DataOutputStream dataOutputStream, String filePath) {
-    File file = new File(filePath);
-    if (file.isDirectory()) {
-        try {
-            zipFolder(Paths.get(filePath));
-            filePath = filePath + ".zip";
-        } catch (IOException e) {
-            System.err.println("Error creating ZIP file: " + e.getMessage());
-        }
-    }
     try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+        File file = new File(filePath);
 
         // Send file metadata first
         dataOutputStream.writeUTF(file.getName());  // Send the file name
