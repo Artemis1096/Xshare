@@ -27,19 +27,19 @@
                         <Image url="@images/menu.png" />
                     </image>
                 </ImageView>
-                <ImageView fitHeight="34.0" fitWidth="41.0" layoutX="666.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true" smooth="false">
-                    <image>
-                        <Image url="@images/logo-app.png" />
-                    </image>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </ImageView>
-                <Label layoutX="611.0" layoutY="9.0" text="Xshare" textFill="WHITE">
-                    <font>
-                        <Font size="20.0" />
-                    </font>
-                </Label>
+            <ImageView fitHeight="34.0" fitWidth="41.0" layoutX="666.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true" smooth="false">
+               <image>
+                  <Image url="@images/logo-app.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </ImageView>
+            <Label layoutX="611.0" layoutY="9.0" text="Xshare" textFill="WHITE">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
             </children>
         </AnchorPane>
     </top>
@@ -122,22 +122,22 @@
                             </font>
                         </Label>
                         <Line endX="384.6666564941406" endY="-9.1552734375E-5" layoutX="101.0" layoutY="43.0" startX="-85.33333587646484" startY="-6.103515625E-5" />
-                        <VBox layoutX="14.0" layoutY="53.0" prefHeight="292.0" prefWidth="429.0">
-                            <children>
-                                <ListView fx:id="clientListView" style="-fx-background-color: #CBC3E3ed;" />
-                                <ListView prefHeight="252.0" prefWidth="430.0" style="-fx-background-color: #CBC3E3ed;" />
-                            </children>
-                        </VBox>
-                        <Button fx:id="sendFileButton" disable="true" layoutX="382.0" layoutY="306.0" mnemonicParsing="false" onAction="#handleSendFile" prefHeight="39.0" prefWidth="103.0" style="-fx-background-color: purple;" text="Send" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
-                        </Button>
-                        <Button fx:id="listClientsButton" disable="true" layoutX="185.0" layoutY="4.0" mnemonicParsing="false" onAction="#handleListClients" prefHeight="27.0" prefWidth="107.0" style="-fx-background-color: purple;" text="Refresh">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
-                        </Button>
+                  <VBox layoutX="14.0" layoutY="53.0" prefHeight="292.0" prefWidth="429.0">
+                     <children>
+                         <ListView fx:id="clientListView" style="-fx-background-color: #CBC3E3ed;" />
+                        <ListView prefHeight="252.0" prefWidth="430.0" style="-fx-background-color: #CBC3E3ed;" />
+                     </children>
+                  </VBox>
+                  <Button fx:id="sendFileButton" disable="true" layoutX="382.0" layoutY="306.0" mnemonicParsing="false" onAction="#handleSendFile" prefHeight="39.0" prefWidth="103.0" style="-fx-background-color: purple;" text="Send" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="listClientsButton" disable="true" layoutX="185.0" layoutY="4.0" mnemonicParsing="false" onAction="#handleListClients" prefHeight="27.0" prefWidth="107.0" style="-fx-background-color: purple;" text="Refresh">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Button>
                     </children>
                 </AnchorPane>
             </children>

@@ -29,7 +29,7 @@ public class SceneController implements Initializable{
 
 
     @Autowired
-    private UserService userService;
+    private UserService userService = new UserService();
 
     @FXML
     private TextField usernameField;

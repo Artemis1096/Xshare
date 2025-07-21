@@ -1,56 +1,29 @@
 package com.example.xshare.backend.service;
 
-import com.example.xshare.backend.exception.UserAlreadyExistsException;
-import com.example.xshare.backend.models.User;
-import com.example.xshare.backend.repository.UserRepository;
-import com.example.xshare.backend.utils.PasswordUtils;
-import javafx.scene.control.Alert;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
-@Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder(); // You could also inject this as a Bean
-    }
-
-    public User registerUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            showAlert("Email Exists","Email Already Exists, kindly login.");
-            throw new UserAlreadyExistsException("Email already registered");
-        }
-        // Check if the username is already taken
-        if (userRepository.existsByUsername(user.getUsername())) {
-            showAlert("Username Taken","Username Already Exists, kindly choose another or login!.");
-
-            throw new UserAlreadyExistsException("Username is already taken");
-        }
-
-        // Encrypt password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        return userRepository.save(user);
-    }
+    private static final String CREDENTIALS_FILE = "/home/pranay/Documents/Xshare2/Xshare-Softablitz/src/main/java/com/example/xshare/backend/service/credentials.txt";
 
     public boolean authenticate(String username, String password) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return false; // User not found
+        try (BufferedReader reader = new BufferedReader(new FileReader(CREDENTIALS_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] credentials = line.split(",");
+                if (credentials.length == 3) {
+                    String storedUsername = credentials[0];
+                    String storedPassword = credentials[1];
+                    if (storedUsername.equals(username) && storedPassword.equals(password)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return PasswordUtils.verifyPassword(password, user.getPassword()); // Verify the password
-    }
-
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setContentText(message);
-        alert.showAndWait();
+        return false;
     }
 }
